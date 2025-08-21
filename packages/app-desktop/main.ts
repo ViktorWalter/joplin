@@ -21,6 +21,25 @@ import registerCustomProtocols from './utils/customProtocols/registerCustomProto
 // application name to the right string.
 electronApp.setName(packageInfo.name);
 
+const dns = require('node:dns');
+let address;
+
+dns.lookup('desktop-direct', function(err, result) {
+  console.log('address:')
+  console.log(result)
+  address=result
+});
+
+electronApp.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  if (url.startsWith('https://'+address)) {
+    // Verification logic.
+    event.preventDefault()
+    callback(true)
+  } else {
+    callback(false)
+  }
+});
+
 process.on('unhandledRejection', (reason, p) => {
 	console.error('Unhandled promise rejection', p, 'reason:', reason);
 	process.exit(1);
